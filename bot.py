@@ -6,13 +6,14 @@ from telegram.ext import Application, CommandHandler, MessageHandler, filters
 # Твой API-токен от BotFather
 TELEGRAM_BOT_TOKEN = "7302486009:AAEjvjmgyeqFU2Hd_KgL5SgHmwAtKL0O1Q0"
 
-# API GigaChat (ключ авторизации и параметры)
-GIGACHAT_CREDENTIALS = "NzU0ZjA2NzctYjlmOC00M2UxLWExNWQtNmQwNTIxMjg1Yzc3OjBiMjY2ZTIwLWI5YzQtNDc5NS05YzNhLTZiMTZhOGRmYjkxNw=="
-GIGACHAT_SCOPE = "GIGACHAT_API_PERS"  # Версия API
-GIGACHAT_MODEL = "GigaChat"  # Явное указание модели
-GIGACHAT_STREAMING = False  # Без потоковой передачи
+# Настройки GigaChat API
+GIGACHAT_AUTH_URL = "https://ngw.devices.sberbank.ru:9443/api/v2/oauth"
+GIGACHAT_CHAT_URL = "https://gigachat.devices.sberbank.ru/api/v1/chat/completions"
+GIGACHAT_SCOPE = "GIGACHAT_API_PERS"
+
+# Твои учетные данные для Basic Auth (нужно заменить)
+GIGACHAT_AUTH_KEY = "NzU0ZjA2NzctYjlmOC00M2UxLWExNWQtNmQwNTIxMjg1Yzc3OjBiMjY2ZTIwLWI5YzQtNDc5NS05YzNhLTZiMTZhOGRmYjkxNw=="  # В формате 'Basic <base64-кодированные креды>'
 VERIFY_SSL_CERTS = False  # Отключение проверки SSL-сертификатов
-GIGACHAT_API_URL = "https://gigachat.devices.sberbank.ru/api/v1/models"
 
 # Настройка логирования
 logging.basicConfig(
@@ -25,24 +26,39 @@ logging.basicConfig(
 )
 
 
-async def start(update: Update, context):
-    """Обработчик команды /start"""
-    logging.info(f"Пользователь {update.message.chat.id} запустил бота")
-    await update.message.reply_text("Привет! Я бот, который отвечает с помощью GigaChat.")
-
-
-def ask_gigachat(prompt, user_id):
-    """Функция отправки запроса в GigaChat с логированием"""
+def get_gigachat_token():
+    """Получает новый Access Token для GigaChat."""
     headers = {
-        "Authorization": f"Bearer {GIGACHAT_CREDENTIALS}",
+        "Authorization": GIGACHAT_AUTH_KEY,
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Accept": "application/json"
+    }
+    data = {"scope": GIGACHAT_SCOPE}
+
+    try:
+        response = requests.post(GIGACHAT_AUTH_URL, headers=headers, data=data, verify=VERIFY_SSL_CERTS)
+        response.raise_for_status()
+        access_token = response.json().get("access_token")
+        logging.info("[GigaChat] Получен новый токен")
+        return access_token
+    except requests.exceptions.RequestException as e:
+        logging.error(f"[GigaChat Error] Ошибка получения токена: {e}")
+        return None
+
+
+async def ask_gigachat(prompt, user_id):
+    """Отправляет запрос в GigaChat."""
+    access_token = get_gigachat_token()
+    if not access_token:
+        return "Ошибка: не удалось получить токен GigaChat."
+
+    headers = {
+        "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json"
     }
 
     data = {
-        "model": GIGACHAT_MODEL,
-        "scope": GIGACHAT_SCOPE,
-        "streaming": GIGACHAT_STREAMING,
-        "verify_ssl_certs": VERIFY_SSL_CERTS,
+        "model": "GigaChat",
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.7
     }
@@ -50,28 +66,28 @@ def ask_gigachat(prompt, user_id):
     logging.info(f"[GigaChat Request] User {user_id}: {prompt}")
 
     try:
-        response = requests.post(GIGACHAT_API_URL, json=data, headers=headers, verify=VERIFY_SSL_CERTS)
+        response = requests.post(GIGACHAT_CHAT_URL, json=data, headers=headers, verify=VERIFY_SSL_CERTS)
+        response.raise_for_status()
+        response_data = response.json()
+        response_text = response_data.get("choices", [{}])[0].get("message", {}).get("content", "Ошибка в ответе GigaChat")
+        logging.info(f"[GigaChat Response] User {user_id}: {response_text}")
+        return response_text
+    except requests.exceptions.RequestException as e:
+        logging.error(f"[GigaChat Error] {e}")
+        return "Ошибка при запросе к GigaChat."
 
-        if response.status_code == 200:
-            response_data = response.json()
-            response_text = response_data.get("choices", [{}])[0].get("message", {}).get("content",
-                                                                                         "Ошибка в ответе GigaChat")
-            logging.info(f"[GigaChat Response] User {user_id}: {response_text}")
-            return response_text
-        else:
-            logging.error(f"[GigaChat Error] {response.status_code}: {response.text}")
-            return f"Ошибка: {response.status_code}, {response.text}"
 
-    except Exception as e:
-        logging.exception(f"[GigaChat Exception] {e}")
-        return "Произошла ошибка при запросе к GigaChat."
+async def start(update: Update, context):
+    """Обработчик команды /start"""
+    logging.info(f"Пользователь {update.message.chat.id} запустил бота")
+    await update.message.reply_text("Привет! Я бот, который отвечает с помощью GigaChat.")
 
 
 async def handle_message(update: Update, context):
     """Обработчик входящих сообщений"""
     user_text = update.message.text
     user_id = update.message.chat.id
-    response = ask_gigachat(user_text, user_id)
+    response = await ask_gigachat(user_text, user_id)
     await update.message.reply_text(response)
 
 
