@@ -1,10 +1,11 @@
 import requests
 import logging
+import urllib.parse
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
 
 # Токен Telegram-бота
-TELEGRAM_BOT_TOKEN = "7302486009:AAEjvjmgyeqFU2Hd_KgL5SgHmwAtKL0O1Q0"
+TELEGRAM_BOT_TOKEN = "<YOUR_TELEGRAM_BOT_TOKEN>"
 
 # GigaChat API
 GIGACHAT_AUTH_URL = "https://ngw.devices.sberbank.ru:9443/api/v2/oauth/token"
@@ -12,8 +13,8 @@ GIGACHAT_CHAT_URL = "https://gigachat.devices.sberbank.ru/api/v1/chat/completion
 GIGACHAT_SCOPE = "GIGACHAT_API_PERS"
 
 # Учетные данные для авторизации
-CLIENT_ID = "754f0677-b9f8-43e1-a15d-6d0521285c77"
-CLIENT_SECRET = "fe13bda3-7638-4a1e-a869-070df5561826"
+CLIENT_ID = "<YOUR_CLIENT_ID>"
+CLIENT_SECRET = "<YOUR_CLIENT_SECRET>"
 
 # Отключение проверки SSL-сертификатов (только для тестирования)
 VERIFY_SSL_CERTS = True
@@ -34,21 +35,22 @@ def get_gigachat_token():
         "Content-Type": "application/x-www-form-urlencoded",
         "Accept": "application/json"
     }
-    data = {
+    data = urllib.parse.urlencode({
         "grant_type": "client_credentials",
-        "client_id": CLIENT_ID,
-        "client_secret": CLIENT_SECRET,
-        "scope": GIGACHAT_SCOPE
-    }
+        "client_id": CLIENT_ID.strip(),
+        "client_secret": CLIENT_SECRET.strip(),
+        "scope": GIGACHAT_SCOPE.strip()
+    })
     logging.info("[GigaChat] 🔄 Запрос на получение токена...")
     try:
         response = requests.post(GIGACHAT_AUTH_URL, headers=headers, data=data, verify=VERIFY_SSL_CERTS)
+        logging.info(f"[GigaChat] 🔍 Ответ сервера: {response.text}")
         response.raise_for_status()
         access_token = response.json().get("access_token")
         logging.info("[GigaChat] ✅ Токен успешно получен")
         return access_token
     except requests.exceptions.RequestException as e:
-        logging.error(f"[GigaChat Error] ❌ Ошибка получения токена: {e}")
+        logging.error(f"[GigaChat Error] ❌ Ошибка получения токена: {e} | Ответ: {response.text}")
         return None
 
 async def ask_gigachat(prompt, user_id):
@@ -69,6 +71,7 @@ async def ask_gigachat(prompt, user_id):
     }
     try:
         response = requests.post(GIGACHAT_CHAT_URL, json=data, headers=headers, verify=VERIFY_SSL_CERTS)
+        logging.info(f"[GigaChat] 🔍 Ответ сервера: {response.text}")
         response.raise_for_status()
         response_data = response.json()
         response_text = response_data["choices"][0]["message"]["content"]
