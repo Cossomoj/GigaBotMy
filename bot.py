@@ -22,7 +22,7 @@ VERIFY_SSL_CERTS = True
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
-        [logging.FileHandler(](logging.FileHandler()"bot.log", encoding="utf-8"),  # Лог в файл
+        [logging.FileHandler]((logging.FileHandler()"bot.log", encoding="utf-8"),  # Лог в файл
         [logging.StreamHandler()](logging.StreamHandler())  # Лог в консоль
     ]
 )
