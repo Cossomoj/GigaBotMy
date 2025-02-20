@@ -4,7 +4,7 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
 
 # Твой API-токен от BotFather
-TELEGRAM_BOT_TOKEN = "7302486009:AAEjvjmgyeqFU2Hd_KgL5SgHmwAtKL0O1Q0"
+TELEGRAM_BOT_TOKEN = "NzU0ZjA2NzctYjlmOC00M2UxLWExNWQtNmQwNTIxMjg1Yzc3OjBiMjY2ZTIwLWI5YzQtNDc5NS05YzNhLTZiMTZhOGRmYjkxNw=="
 
 # Настройки GigaChat API
 GIGACHAT_AUTH_URL = "https://ngw.devices.sberbank.ru:9443/api/v2/oauth"
@@ -47,7 +47,7 @@ def get_gigachat_token():
 
 
 async def ask_gigachat(prompt, user_id):
-    """Отправляет запрос в GigaChat."""
+    """Отправляет запрос в GigaChat-Max."""
     access_token = get_gigachat_token()
     if not access_token:
         return "Ошибка: не удалось получить токен GigaChat."
@@ -58,7 +58,7 @@ async def ask_gigachat(prompt, user_id):
     }
 
     data = {
-        "model": "GigaChat",
+        "model": "GigaChat-Max",
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.7
     }
@@ -80,7 +80,7 @@ async def ask_gigachat(prompt, user_id):
 async def start(update: Update, context):
     """Обработчик команды /start"""
     logging.info(f"Пользователь {update.message.chat.id} запустил бота")
-    await update.message.reply_text("Привет! Я бот, который отвечает с помощью GigaChat.")
+    await update.message.reply_text("Привет! Я бот, который отвечает с помощью GigaChat-Max.")
 
 
 async def handle_message(update: Update, context):
