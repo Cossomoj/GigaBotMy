@@ -12,7 +12,7 @@ GIGACHAT_CHAT_URL = "https://gigachat.devices.sberbank.ru/api/v1/chat/completion
 GIGACHAT_SCOPE = "GIGACHAT_API_PERS"
 
 # Твои учетные данные для Basic Auth (нужно заменить)
-GIGACHAT_AUTH_KEY = "NzU0ZjA2NzctYjlmOC00M2UxLWExNWQtNmQwNTIxMjg1Yzc3OjBiMjY2ZTIwLWI5YzQtNDc5NS05YzNhLTZiMTZhOGRmYjkxNw=="  # В формате 'Basic <base64-кодированные креды>'
+GIGACHAT_AUTH_KEY = "754f0677-b9f8-43e1-a15d-6d0521285c77"  # В формате 'Basic <base64-кодированные креды>'
 VERIFY_SSL_CERTS = False  # Отключение проверки SSL-сертификатов
 
 # Настройка логирования
