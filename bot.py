@@ -18,7 +18,7 @@ GIGACHAT_AUTH_KEY = "NzU0ZjA2NzctYjlmOC00M2UxLWExNWQtNmQwNTIxMjg1Yzc3OjBiMjY2ZTI
 VERIFY_SSL_CERTS = True
 
 # Настройка логирования
-[logging.basicConfig(](logging.basicConfig()
+[logging.basicConfig]((logging.basicConfig()
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
