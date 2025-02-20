@@ -6,8 +6,12 @@ from telegram.ext import Application, CommandHandler, MessageHandler, filters
 # Твой API-токен от BotFather
 TELEGRAM_BOT_TOKEN = "7302486009:AAEjvjmgyeqFU2Hd_KgL5SgHmwAtKL0O1Q0"
 
-# API GigaChat (токен, полученный в личном кабинете)
-GIGACHAT_API_TOKEN = "NzU0ZjA2NzctYjlmOC00M2UxLWExNWQtNmQwNTIxMjg1Yzc3OjBiMjY2ZTIwLWI5YzQtNDc5NS05YzNhLTZiMTZhOGRmYjkxNw=="
+# API GigaChat (ключ авторизации и параметры)
+GIGACHAT_CREDENTIALS = "NzU0ZjA2NzctYjlmOC00M2UxLWExNWQtNmQwNTIxMjg1Yzc3OjBiMjY2ZTIwLWI5YzQtNDc5NS05YzNhLTZiMTZhOGRmYjkxNw=="
+GIGACHAT_SCOPE = "GIGACHAT_API_PERS"  # Версия API
+GIGACHAT_MODEL = "GigaChat"  # Явное указание модели
+GIGACHAT_STREAMING = False  # Без потоковой передачи
+VERIFY_SSL_CERTS = False  # Отключение проверки SSL-сертификатов
 GIGACHAT_API_URL = "https://gigachat-api.sbercloud.ru/api/v1/chat/completions"
 
 # Настройка логирования
@@ -30,12 +34,15 @@ async def start(update: Update, context):
 def ask_gigachat(prompt, user_id):
     """Функция отправки запроса в GigaChat с логированием"""
     headers = {
-        "Authorization": f"Bearer {GIGACHAT_API_TOKEN}",
+        "Authorization": f"Bearer {GIGACHAT_CREDENTIALS}",
         "Content-Type": "application/json"
     }
 
     data = {
-        "model": "GigaChat",
+        "model": GIGACHAT_MODEL,
+        "scope": GIGACHAT_SCOPE,
+        "streaming": GIGACHAT_STREAMING,
+        "verify_ssl_certs": VERIFY_SSL_CERTS,
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.7
     }
@@ -43,7 +50,7 @@ def ask_gigachat(prompt, user_id):
     logging.info(f"[GigaChat Request] User {user_id}: {prompt}")
 
     try:
-        response = requests.post(GIGACHAT_API_URL, json=data, headers=headers)
+        response = requests.post(GIGACHAT_API_URL, json=data, headers=headers, verify=VERIFY_SSL_CERTS)
 
         if response.status_code == 200:
             response_data = response.json()
