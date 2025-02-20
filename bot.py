@@ -12,7 +12,7 @@ GIGACHAT_SCOPE = "GIGACHAT_API_PERS"  # Версия API
 GIGACHAT_MODEL = "GigaChat"  # Явное указание модели
 GIGACHAT_STREAMING = False  # Без потоковой передачи
 VERIFY_SSL_CERTS = False  # Отключение проверки SSL-сертификатов
-GIGACHAT_API_URL = "https://gigachat.devices.sberbank.ru/"
+GIGACHAT_API_URL = "https://gigachat.devices.sberbank.ru/api/v1/models"
 
 # Настройка логирования
 logging.basicConfig(
