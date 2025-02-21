@@ -1,123 +1,74 @@
-import requests
-import logging
-import base64
-import uuid
-from telegram import Update
-from telegram.ext import Application, CommandHandler, MessageHandler, filters
-
-# Токен Telegram-бота
-TELEGRAM_BOT_TOKEN = "7302486009:AAEjvjmgyeqFU2Hd_KgL5SgHmwAtKL0O1Q0"
-
-# GigaChat API
-GIGACHAT_AUTH_URL = "https://ngw.devices.sberbank.ru:9443/api/v2/oauth/token"
-GIGACHAT_CHAT_URL = "https://gigachat.devices.sberbank.ru/api/v1/chat/completions"
-
-# Учетные данные для авторизации
-CLIENT_ID = "754f0677-b9f8-43e1-a15d-6d0521285c77"
-CLIENT_SECRET = "fe13bda3-7638-4a1e-a869-070df5561826"
-
-# Настройка логирования
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.FileHandler("bot.log", encoding="utf-8"),
-        logging.StreamHandler()
-    ]
-)
+import telebot
+from telebot import types
+from gigachat import GigaChat
 
 
-def get_gigachat_token():
-    """Получает новый Access Token для GigaChat."""
-    try:
-        # Кодирование client_id:client_secret в base64
-        auth_string = f"{CLIENT_ID}:{CLIENT_SECRET}".encode('ascii')
-        b64_auth = base64.b64encode(auth_string).decode('ascii')
-
-        headers = {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "Accept": "application/json",
-            "RqUID": str(uuid.uuid4()),
-            "Authorization": f"Basic {b64_auth}"
-        }
-
-        data = "scope=GIGACHAT_API_PERS"
-
-        logging.info("[GigaChat] 🔄 Запрос на получение токена...")
-        response = requests.post(
-            GIGACHAT_AUTH_URL,
-            headers=headers,
-            data=data,
-            verify=True
-        )
-        response.raise_for_status()
-        access_token = response.json().get("access_token")
-        logging.info("[GigaChat] ✅ Токен успешно получен")
-        return access_token
-
-    except Exception as e:
-        logging.error(f"[GigaChat Error] ❌ Ошибка получения токена: {str(e)}")
-        if hasattr(e, 'response') and e.response:
-            logging.error(f"Ответ сервера: {e.response.text}")
-        return None
+# Ваш API-токен GigaChat
 
 
-async def ask_gigachat(prompt, user_id):
-    """Отправляет запрос в GigaChat и получает ответ."""
-    logging.info(f"[GigaChat] 🔄 Запрос пользователя {user_id}: {prompt}")
-    access_token = get_gigachat_token()
-    if not access_token:
-        return "Ошибка: не удалось получить токен GigaChat."
-
-    headers = {
-        "Authorization": f"Bearer {access_token}",
-        "Content-Type": "application/json"
-    }
-
-    data = {
-        "model": "GigaChat",
-        "messages": [{"role": "user", "content": prompt}],
-        "temperature": 0.7
-    }
-
-    try:
-        response = requests.post(
-            GIGACHAT_CHAT_URL,
-            json=data,
-            headers=headers,
-            verify=True
-        )
-        response.raise_for_status()
-        response_data = response.json()
-        response_text = response_data["choices"][0]["message"]["content"]
-        logging.info(f"[GigaChat] ✅ Ответ пользователю {user_id}")
-        return response_text
-
-    except Exception as e:
-        logging.error(f"[GigaChat Error] ❌ Ошибка запроса: {str(e)}")
-        if hasattr(e, 'response') and e.response:
-            logging.error(f"Ответ сервера: {e.response.text}")
-        return "Ошибка при обработке запроса"
+def ask_gigachat(question):
+    API_TOKEN = "NzU0ZjA2NzctYjlmOC00M2UxLWExNWQtNmQwNTIxMjg1Yzc3OmZlMTNiZGEzLTc2MzgtNGExZS1hODY5LTA3MGRmNTU2MTgyNg=="
+    giga = GigaChat(credentials=API_TOKEN, verify_ssl_certs=False)  # Инициализация с API-ключом
+    response = giga.chat(question)  # Используем метод chat
+    return response.choices[0].message.content
 
 
-# Остальной код без изменений
-async def start(update: Update, context):
-    """Обработчик команды /start"""
-    logging.info(f"✅ Пользователь {update.message.chat.id} запустил бота")
-    await update.message.reply_text("Привет! Я бот, который отвечает с помощью GigaChat.")
+# Вставьте сюда ваш токен
+bot = telebot.TeleBot("7302486009:AAEjvjmgyeqFU2Hd_KgL5SgHmwAtKL0O1Q0")
 
 
-async def handle_message(update: Update, context):
-    """Обработчик входящих сообщений"""
-    user_text = update.message.text
-    user_id = update.message.chat.id
-    response = await ask_gigachat(user_text, user_id)
-    await update.message.reply_text(response)
+# Обработчик команды /start
+@bot.message_handler(commands=['start'])
+def send_welcome(message):
+    # Создаем inline-клавиатуру с большой синей кнопкой
+    markup = types.InlineKeyboardMarkup()
+    button = types.InlineKeyboardButton(text="Start", callback_data="start")
+    markup.add(button)
+
+    # Отправляем сообщение с кнопкой
+    bot.send_message(message.chat.id, "Добро пожаловать! Нажмите кнопку ниже, чтобы начать:", reply_markup=markup)
 
 
-app = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
-app.add_handler(CommandHandler("start", start))
-app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+@bot.message_handler(commands=['menu'])
+def handle_menu(message):
+    bot.send_message(message.chat.id, "выберите роль")
 
-logging.info("🚀 Бот запущен...")
-app.run_polling()
+
+@bot.callback_query_handler(func=lambda call: call.data == "start")
+def handle_start(call):
+    markup = types.InlineKeyboardMarkup()
+    button = types.InlineKeyboardButton(text="Menu", callback_data="menu")
+    markup.add(button)
+
+    # Редактируем сообщение, чтобы убрать кнопку после нажатия
+    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="Вы нажали Start!")
+    # Дополнительные действия после нажатия кнопки
+    bot.send_message(call.message.chat.id, "Теперь вы можете продолжить использовать бота.", reply_markup=markup)
+
+
+@bot.callback_query_handler(func=lambda call: call.data == "menu")
+def handle_menu(call):
+    markup = types.InlineKeyboardMarkup()
+    button = types.InlineKeyboardButton(text="SA", callback_data="sa")
+    markup.add(button)
+
+    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="Выберите роль",
+                          reply_markup=markup)
+
+
+@bot.callback_query_handler(func=lambda call: call.data == "sa")
+def handle_menu(call):
+    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="Введите ваш вопрос")
+
+    bot.register_next_step_handler(call.message, process_question)
+
+
+def process_question(message):
+    question = message.text
+    answer = ask_gigachat(question)
+    bot.send_message(message.chat.id, answer)
+    send_welcome(message)
+
+
+# Запуск бота
+bot.polling(none_stop=True)
