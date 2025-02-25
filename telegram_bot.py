@@ -3,7 +3,7 @@ from telebot import types
 import asyncio
 import websockets
 
-WEBSOCKET_URL = "ws://127.0.0.1:8001/ws"
+WEBSOCKET_URL = "ws://127.0.0.1:8000/ws"
 
 # Токен Telegram-бота
 bot = telebot.TeleBot("7302486009:AAEjvjmgyeqFU2Hd_KgL5SgHmwAtKL0O1Q0")
