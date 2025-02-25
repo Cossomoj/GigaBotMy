@@ -6,7 +6,7 @@ import websockets
 WEBSOCKET_URL = "ws://127.0.0.1:8000/ws"
 
 # Токен Telegram-бота
-bot = telebot.TeleBot("7765491915:AAHhTJUfHoM6QshSHjzormMTQr3AAw6UJCs")
+bot = telebot.TeleBot("7302486009:AAEjvjmgyeqFU2Hd_KgL5SgHmwAtKL0O1Q0")
 
 # Хранение контекста пользователя (диалогов)
 user_contexts = {}
