@@ -3,4 +3,3 @@ python-dotenv
 asyncio
 websockets
 requests
-json
