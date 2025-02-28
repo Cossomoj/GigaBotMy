@@ -23,7 +23,7 @@ load_dotenv()
 app = FastAPI()
 
 api_key = os.getenv("GIGACHAT_API_KEY")
-folder_path = "txt_docs"
+folder_path = os.path.join(os.getcwd(), "txt_docs")
 
 # Получаем список всех файлов .txt в указанной директории
 file_paths = [os.path.join(folder_path, f) for f in os.listdir(folder_path) if f.endswith(".txt")]
