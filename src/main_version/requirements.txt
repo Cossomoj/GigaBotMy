@@ -5,3 +5,4 @@ websockets
 fastapi
 uvicorn
 faiss-cpu
+langchain_community
