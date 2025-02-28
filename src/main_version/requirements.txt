@@ -2,3 +2,6 @@ telebot
 python-dotenv
 asyncio
 websockets
+fastapi
+uvicorn
+faiss-cpu
