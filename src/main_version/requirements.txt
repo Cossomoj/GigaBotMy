@@ -1,9 +1,7 @@
 fastapi
 uvicorn
-gigachain
 faiss-cpu
 sentence-transformers
-gigachat
 langchain
 langchain_gigachat
 langchain_community
@@ -12,7 +10,5 @@ langchain_huggingface
 huggingface-hub
 websockets
 python-dotenv
-pydantic
-requests
 pyTelegramBotAPI
 pypdf
