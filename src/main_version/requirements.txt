@@ -1,14 +1,4 @@
-fastapi
-uvicorn
-faiss-cpu
-sentence-transformers
-langchain
-langchain_gigachat
-langchain_community
-langchain-core
-langchain_huggingface
-huggingface-hub
-websockets
+telebot
 python-dotenv
-pyTelegramBotAPI
-pypdf
+asyncio
+websockets
