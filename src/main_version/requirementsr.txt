@@ -8,3 +8,4 @@ faiss-cpu
 langchain_community
 langchain_gigachat
 langchain_huggingface
+sentence-transformers
