@@ -22,6 +22,9 @@ load_dotenv()
 # Инициализация FastAPI
 app = FastAPI()
 
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
 api_key = os.getenv("GIGACHAT_API_KEY")
 #folder_path = "txt_docs"
 #folder_path = os.path.join(os.getcwd(), "txt_docs")
