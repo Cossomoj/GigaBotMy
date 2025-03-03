@@ -12,8 +12,7 @@ import uvicorn
 import threading
 load_dotenv()
 
-WEBSOCKET_URL = "ws://127.0.0.1:8000/ws"
-
+# Создание FastAPI-приложения
 app = FastAPI()
 
 @app.get("/health")
@@ -28,11 +27,8 @@ def health_check():
 def run_fastapi():
     uvicorn.run(app, host="0.0.0.0", port=8080)
 
-# Запускаем FastAPI сервер в фоновом потоке
+# Запускаем FastAPI сервер в отдельном потоке
 threading.Thread(target=run_fastapi, daemon=True).start()
-secret_key = os.getenv("TELEGRAM_API_KEY")
-cache_dict = {}
-
 # Токен Telegram-бота
 bot = telebot.TeleBot(secret_key)
 
