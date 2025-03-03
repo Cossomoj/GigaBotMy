@@ -29,6 +29,11 @@ def run_fastapi():
 
 # Запускаем FastAPI сервер в отдельном потоке
 threading.Thread(target=run_fastapi, daemon=True).start()
+WEBSOCKET_URL = "ws://127.0.0.1:8000/ws"
+
+secret_key = os.getenv("TELEGRAM_API_KEY")
+cache_dict = {}
+
 # Токен Telegram-бота
 bot = telebot.TeleBot(secret_key)
 
