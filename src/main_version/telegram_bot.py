@@ -7,28 +7,8 @@ import requests
 import json
 import time
 import os
-from fastapi import FastAPI
-import uvicorn
-import threading
 load_dotenv()
 
-# Создание FastAPI-приложения
-app = FastAPI()
-
-@app.get("/health")
-def health_check():
-    try:
-        test_message = bot.send_message(chat_id=ALERT_CHAT_ID, text="✅ Бот на связи!", disable_notification=True)
-        bot.delete_message(chat_id=ALERT_CHAT_ID, message_id=test_message.message_id)  # Удаляем тестовое сообщение
-        return {"status": "ok", "message": "Telegram-бот работает"}
-    except Exception as e:
-        return {"status": "error", "message": f"Ошибка: {e}"}
-
-def run_fastapi():
-    uvicorn.run(app, host="0.0.0.0", port=8080)
-
-# Запускаем FastAPI сервер в отдельном потоке
-threading.Thread(target=run_fastapi, daemon=True).start()
 WEBSOCKET_URL = "ws://127.0.0.1:8000/ws"
 
 secret_key = os.getenv("TELEGRAM_API_KEY")
