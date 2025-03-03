@@ -7,10 +7,15 @@ import requests
 import json
 import time
 import os
+from fastapi import FastAPI
 load_dotenv()
 
 WEBSOCKET_URL = "ws://127.0.0.1:8000/ws"
 
+app = FastAPI()
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
 secret_key = os.getenv("TELEGRAM_API_KEY")
 cache_dict = {}
 
